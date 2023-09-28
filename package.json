@@ -1,0 +1,18 @@
+{
+  "name": "wiki-gadgets",
+  "version": "1.0.0",
+  "description": "Gadgets on Japanese Wikipedia.",
+  "main": "index.js",
+  "scripts": {
+    "test": "start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "wiki-gadgets"
+  },
+  "keywords": [
+    "wiki"
+  ],
+  "author": "Dr4goniez",
+  "license": "CC-BY-SA-4.0"
+}
