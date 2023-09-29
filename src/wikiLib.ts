@@ -18,15 +18,69 @@ interface MwString {
 // @ts-ignore
 const mwString: MwString = mw.loader.require('mediawiki.String');
 
-// **************************************************** POLLYFILLS ****************************************************
+// **************************************************** POLYFILLS ****************************************************
 
-// String.prototype.includes
+// Types don't really matter with polyfills
 
-// Array.prototype.includes
+if (!String.prototype.includes) {
+	// https://github.com/alfaslash/string-includes-polyfill/blob/master/string-includes-polyfill.js
+	String.prototype.includes = function(search: string, start?: number): boolean {
+		if (typeof start !== 'number') {
+            start = 0;
+        }
+        if (start + search.length > this.length) {
+            return false;
+        } else {
+            return this.indexOf(search, start) !== -1;
+        }
+	};
+}
 
-// Array.prototype.findIndex
+if (!Array.prototype.includes) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Array.prototype.includes = function(searchElement: any, fromIndex?: number): boolean {
+		fromIndex = typeof fromIndex === 'number' && fromIndex >= 0 ? fromIndex : 0;
+		return this.indexOf(searchElement, fromIndex) !== -1;
+	};
+}
 
-// Object.assign
+if (!Array.prototype.findIndex) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Array.prototype.findIndex = function<T>(predicate: (value: T, index: number, obj: T[]) => boolean, thisArg?: any): number {
+		if (typeof predicate !== 'function') {
+			throw new TypeError(typeof predicate + ' is not a function');
+		}
+		for (let i = 0; i < this.length; i++) {
+			if (predicate.call(thisArg, this[i], i, this)) {
+				return i;
+			}
+		}
+		return -1;
+	};
+}
+
+if (!Object.assign) {
+	// https://github.com/ryanhefner/Object.assign/blob/master/index.js
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Object.assign = function(target: object, ...sources: any[]): any {
+		if (target === undefined || target === null) {
+			throw new TypeError('Cannot convert undefined or null to object');
+		}
+		const output = Object(target);
+		for (let index = 1; index < sources.length; index++) {
+			const source = sources[index];
+			if (source !== undefined && source !== null) {
+				for (const nextKey in source) {
+					// eslint-disable-next-line no-prototype-builtins
+					if (source.hasOwnProperty(nextKey)) {
+						output[nextKey] = source[nextKey];
+					}
+				}
+			}
+		}
+		return output;
+	};
+}
 
 // **************************************************** LIB OBJECT ****************************************************
 
@@ -129,7 +183,7 @@ function massRequest(params: DynamicObject, batchParams: string|string[], apilim
 	// Initialize variables
 	params = Object.assign({}, params);
 	// @ts-ignore
-	const hasApiHighLimits = [].concat(mw.config.get('wgUserGroups'), mw.config.get('wgGlobalGroups') || []).some((group) => {
+	const hasApiHighLimits = mw.config.get('wgUserGroups').concat(mw.config.get('wgGlobalGroups') || []).some((group) => {
 		return ['sysop', 'bot', 'apihighlimits-requestor', 'global-bot', 'founder', 'staff', 'steward', 'sysadmin', 'wmf-researcher'].includes(group);
 	});
 	apilimit = apilimit || (hasApiHighLimits ? 500 : 50);
@@ -190,14 +244,7 @@ function massRequest(params: DynamicObject, batchParams: string|string[], apilim
 		result.push(req(params));
 	}
 
-	// eslint-disable-next-line prefer-spread
-	return $.when.apply($, result).then(({...args}) => {
-		const ret: (DynamicObject|null)[] = [];
-		for (let i = 0; i < args.length; i++) {
-			ret.push(args[i]);
-		}
-		return ret;
-	});
+	return $.when(...result).then((...args) => args);
 
 }
 
