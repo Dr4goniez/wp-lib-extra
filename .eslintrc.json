@@ -17,6 +17,7 @@
     ],
     "rules": {
         "semi": "off",
-        "@typescript-eslint/semi": "warn"
+        "@typescript-eslint/semi": "warn",
+        "@typescript-eslint/ban-ts-comment": "off"
     }
 }

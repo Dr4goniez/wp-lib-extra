@@ -1,10 +1,11 @@
 {
 	"name": "wiki-gadgets",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "Gadgets on Japanese Wikipedia.",
 	"main": "index.js",
 	"scripts": {
-		"test": "start"
+		"test": "start",
+		"build": "tsc -p ."
 	},
 	"repository": {
 		"type": "git",
