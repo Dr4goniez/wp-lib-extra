@@ -35,6 +35,173 @@ const wikiLib = (() => {
 // **************************************************** UTIL FUNCTIONS ****************************************************
 
 /**
+ * Load all the modules that this library depends on.
+ * @returns 
+ */
+function load(): JQuery.Promise<void> {
+	const def = $.Deferred();
+	mw.loader.using([
+		'mediawiki.Title',
+		'mediawiki.util',
+		'mediawiki.Api'
+	]).then(function() {
+		def.resolve();
+	});
+	return def.promise();
+}
+
+/**
+ * Let the code sleep for n milliseconds.
+ * @param milliseconds The milliseconds to sleep. If a negative number is passed, it is automatically rounded up to `0`.
+ * @returns
+ */
+function sleep(milliseconds: number): JQuery.Promise<void> {
+	const def = $.Deferred();
+	setTimeout(def.resolve, Math.max(0, milliseconds));
+	return def.promise();
+}
+
+interface DynamicObject {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any;
+}
+/**
+ * Send an API request that automatically continues until the limit is reached. Works only for calls that have a 'continue' property in the response.
+ * @param params
+ * @param limit Default: 10
+ * @returns The returned array might have `null` elements if any internal API request failed.
+ * @requires mediawiki.Api
+ */
+function continuedRequest(params: DynamicObject, limit = 10): JQuery.Promise<(DynamicObject|null)[]> {
+
+	const api = new mw.Api();
+	const responses: (DynamicObject|null)[] = [];
+
+	const query = (params: DynamicObject, count: number): JQuery.Promise<(DynamicObject|null)[]> => {
+		return api.get(params)
+			.then((res) => {
+				responses.push(res || null);
+				if (res.continue && count < limit) {
+					return query(Object.assign(params, res.continue), count + 1);
+				} else {
+					return responses;
+				}
+			}).catch((_, err) => {
+				console.log(`continuedRequest: Request failed (reason: ${err.error.info}, loop count: ${count}).`);
+				responses.push(null);
+				return responses;
+			});
+	};
+
+	return query(params, 1);
+
+}
+
+/**
+ * Send API requests with an apilimit-susceptible query parameter all at once. For instance:
+ * ```
+ * {
+ * 	action: 'query',
+ * 	titles: 'A|B|C|D|...', // This parameter is subject to the apilimit of 500 or 50
+ * 	formatversion: '2'
+ * }
+ * ```
+ * Pass the multi-value field as an array, and then this function sends multiple API requests by splicing the array in
+ * accordance with the current user's apilimit (`500` for bots, `50` otherwise). It is also neccesary to pass the name
+ * of the field to the second parameter of this function (if the request parameters have more than one multi-value field,
+ * an array can be passed to the second parameter).
+ *
+ * @param params The request parameters.
+ * @param batchParam
+ * The name of the multi-value field (can be an array).
+ * @param apilimit
+ * Optional splicing number (default: `500/50`). The `**limit` parameter, if there is any, is automatically set to `max`
+ * if this argument has the value of either `500` or `50`. It also accepts a unique value like `1`, in cases such as
+ * {@link https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bblocks |list=blocks} with a `bkip` parameter
+ * (which only allows one IP to be specified).
+ * @returns
+ * Always an array: Elements are either `ApiResponse` (success) or `null` (failure). If the multi-value field is an empty array,
+ * the return array will also be empty.
+ * @requires mediawiki.Api
+ */
+function massRequest(params: DynamicObject, batchParams: string|string[], apilimit?: number): JQuery.Promise<(DynamicObject|null)[]> {
+
+	// Initialize variables
+	params = Object.assign({}, params);
+	// @ts-ignore
+	const hasApiHighLimits = [].concat(mw.config.get('wgUserGroups'), mw.config.get('wgGlobalGroups') || []).some((group) => {
+		return ['sysop', 'bot', 'apihighlimits-requestor', 'global-bot', 'founder', 'staff', 'steward', 'sysadmin', 'wmf-researcher'].includes(group);
+	});
+	apilimit = apilimit || (hasApiHighLimits ? 500 : 50);
+	const nonArrayBatchParams: string[] = [];
+
+	// Get the array to be used for the batch operation
+	const batchKeys = Array.isArray(batchParams) ? batchParams : [batchParams];
+	const batchArrays = Object.keys(params).reduce((acc: string[][], key) => {
+		if (batchKeys.includes(key)) {
+			if (Array.isArray(params[key])) {
+				acc.push(params[key].slice());
+			} else {
+				nonArrayBatchParams.push(key);
+			}
+		} else if (/limit$/.test(key) && (apilimit === 500 || apilimit === 50)) {
+			// If this is a '**limit' parameter and the value is the default one, set it to 'max'
+			params[key] = 'max';
+		}
+		return acc;
+	}, []); 
+	if (nonArrayBatchParams.length) {
+		throw new Error('The batch param(s) (' + nonArrayBatchParams.join(', ') + ') must be arrays.');
+	} else if (!batchKeys.length) {
+		throw new Error('There is a problem with the value of the "batchParams" parameter.');
+	} else if (!batchArrays.length) {
+		throw new Error('The passed API params do not contain arrays for the batch operation.');
+	} else if (batchArrays.length > 1 && !batchArrays.slice(1).every((arr) => arraysEqual(batchArrays[0], arr))) {
+		throw new Error('The arrays passed for the batch operation must all be non-distinct with each other.');
+	}
+
+	// Final check
+	const batchArray = batchArrays[0];
+	if (!batchArray.length) {
+		console.log('An empty array has been passed for the batch operation.');
+		return $.Deferred().resolve([]);
+	}
+
+	// Send API requests
+	const api = new mw.Api();
+	const req = (reqParams: DynamicObject): JQuery.Promise<DynamicObject|null> => {
+		return api.post(reqParams)
+		.then((res: DynamicObject) => res || null)
+		.catch((_, err) => {
+			console.warn(err);
+			return null;
+		});
+	};
+	const result: JQuery.Promise<DynamicObject|null>[] = [];
+	while (batchArray.length !== 0) {
+		const batchArrayStr = batchArray.splice(0, apilimit).join('|');
+		Object.assign( // Overwrite the batch parameters with a stringified batch array 
+			params,
+			batchKeys.reduce((acc: DynamicObject, key) => {
+				acc[key] = batchArrayStr;
+				return acc;
+			}, Object.create(null))
+		);
+		result.push(req(params));
+	}
+
+	// eslint-disable-next-line prefer-spread
+	return $.when.apply($, result).then(({...args}) => {
+		const ret: (DynamicObject|null)[] = [];
+		for (let i = 0; i < args.length; i++) {
+			ret.push(args[i]);
+		}
+		return ret;
+	});
+
+}
+
+/**
  * Remove unicode bidirectional characters and leading/trailing `\s`s from a string.
  *
  * @param str Input string.
@@ -47,6 +214,44 @@ function clean(str: string, trim = true): string {
 	 */
 	str = str.replace(/[\u200E\u200F\u202A-\u202E]+/g, '');
 	return trim ? str.trim() : str;
+}
+
+/**
+ * A disjunctive union type for primitive types.
+ */
+type primitive = string|number|bigint|boolean|null|undefined;
+
+/**
+ * Check whether two arrays are equal. Neither array should contain non-primitive values as its elements.
+ * @param array1
+ * @param array2
+ * @param orderInsensitive Default: `false`
+ * @returns
+ */
+function arraysEqual(array1: primitive[], array2: primitive[], orderInsensitive = false): boolean {
+	if (orderInsensitive) {
+		return array1.length === array2.length && array1.every(el => array2.includes(el));
+	} else {
+		return array1.length === array2.length && array1.every((el, i) => array2[i] === el);
+	}
+}
+
+/**
+ * Compare elements in two arrays and get differences.
+ * @param sourceArray
+ * @param targetArray
+ * @returns
+ */
+function arraysDiff(sourceArray: primitive[], targetArray: primitive[]) {
+	const added: primitive[] = [];
+	const removed: primitive[] = [];
+	sourceArray.forEach((el) => {
+		if (!targetArray.includes(el)) removed.push(el);
+	});
+	targetArray.forEach((el) => {
+		if (!sourceArray.includes(el)) added.push(el);
+	});
+	return {added, removed};
 }
 
 // **************************************************** CLASSES ****************************************************
@@ -693,21 +898,13 @@ class Template {
 }
 
 return {
+	load,
+	sleep,
+	continuedRequest,
+	massRequest,
 	clean,
-	/**
-	 * Load all the modules that this library depends on.
-	 * @returns 
-	 */
-	load: (): JQuery.Promise<void> => {
-		const def = $.Deferred();
-		mw.loader.using([
-			'mediawiki.Title',
-			'mediawiki.util'
-		]).then(function() {
-			def.resolve();
-		});
-		return def.promise();
-	},
+	arraysEqual,
+	arraysDiff,
 	Template
 };
 
