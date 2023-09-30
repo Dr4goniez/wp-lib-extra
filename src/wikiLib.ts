@@ -1,5 +1,6 @@
 /**
  * @link https://doc.wikimedia.org/mediawiki-core/master/js/source/mediawiki.String.html#mw-String
+ * @internal
  */
 interface MwString {
 	/**
@@ -15,6 +16,7 @@ interface MwString {
 	 */
 	ucFirst: (string: string) => string;
 }
+/** @internal */
 // @ts-ignore
 const mwString: MwString = mw.loader.require('mediawiki.String');
 

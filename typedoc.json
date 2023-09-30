@@ -1,0 +1,9 @@
+{
+	"name": "wikiLib",
+	"includeVersion": true,
+	"entryPoints": ["./src/wikiLib.ts"],
+	"excludePrivate": true,
+	"excludeInternal": true,
+	"tsconfig": "tsconfig.json",
+	"exclude": ["node_modules"]
+}
