@@ -1,4 +1,36 @@
 /**
+ * @packageDocumentation
+ * `wikiLib` is a function library prepared as a gadget on the Japanese Wikipedia.
+ * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-wikiLib.js}
+ * 
+ * This library is best characterized by its {@link Wikitext} class, which provides various interfaces to parse
+ * wikitext, supplementing functionalities that built-in JavaScript libraries of MediaWiki lack.
+ * 
+ * How to use this library:
+ * ```
+ * // In gadgets
+ * var wikiLib = require('./wikiLib.js');
+ * ```
+ * ```
+ * // In user scripts
+ * var moduleName = 'ext.gadget.wikiLib';
+ * mw.loader.using(moduleName, function(require) {
+ * 	var wikiLib = require(moduleName);
+ * });
+ * ```
+ * ```
+ * // In user scripts (on a foreign project)
+ * var moduleName = 'ext.gadget.wikiLib';
+ * var moduleUrl = '//ja.wikipedia.org/w/load.php?modules=' + moduleName;
+ * mw.loader.getScript(moduleUrl).then(function() {
+ * 	mw.loader.using(moduleName).then(function(require) {
+ * 		var wikiLib = require(moduleName);
+ * 	});
+ * });
+ * ```
+ */
+
+/**
  * @link https://doc.wikimedia.org/mediawiki-core/master/js/source/mediawiki.String.html#mw-String
  * @internal
  */
@@ -123,17 +155,13 @@ if (!String.prototype.repeat) {
 	};
 }
 
-// **************************************************** LIB OBJECT ****************************************************
-
-const wikiLib = (() => {
-
 // **************************************************** UTIL FUNCTIONS ****************************************************
 
 /**
  * Load all the modules that this library depends on.
- * - `mediawiki.Title`
- * - `mediawiki.util`
- * - `mediawiki.Api`
+ * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Title |mediawiki.Title}
+ * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.util |mediawiki.util}
+ * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Api |mediawiki.Api}
  * @returns 
  */
 function load(): JQueryPromise<void> {
@@ -148,7 +176,7 @@ function load(): JQueryPromise<void> {
 }
 
 /**
- * Let the code sleep for n milliseconds.
+ * Let the code sleep for `n` milliseconds.
  * @param milliseconds The milliseconds to sleep. If a negative number is passed, it is automatically rounded up to `0`.
  * @returns
  */
@@ -166,7 +194,7 @@ interface DynamicObject {
  * Send an API request that automatically continues until the limit is reached. Works only for calls that have a 'continue' property in the response.
  * @param params
  * @param limit Default: 10
- * @returns The returned array might have `null` elements if any internal API request failed.
+ * @returns The return array might have `null` elements if any internal API request failed.
  * @requires mediawiki.Api
  */
 function continuedRequest(params: DynamicObject, limit = 10): JQueryPromise<(DynamicObject|null)[]> {
@@ -209,8 +237,7 @@ function continuedRequest(params: DynamicObject, limit = 10): JQueryPromise<(Dyn
  * an array can be passed to the second parameter).
  *
  * @param params The request parameters.
- * @param batchParam
- * The name of the multi-value field (can be an array).
+ * @param batchParam The name of the multi-value field (can be an array).
  * @param apilimit
  * Optional splicing number (default: `500/50`). The `**limit` parameter, if there is any, is automatically set to `max`
  * if this argument has the value of either `500` or `50`. It also accepts a unique value like `1`, in cases such as
@@ -346,7 +373,7 @@ function arraysDiff(sourceArray: primitive[], targetArray: primitive[]) {
 
 // **************************************************** CLASSES ****************************************************
 
-/** The object that stores the properties of a template argument, used in `Template.args`. */
+/** The object that stores the properties of a template argument, used in {@link Template.args}. */
 interface TemplateArgument {
 	/**
 	 * The argument name, from which unicode bidirectional characters and leading/trailing spaces are removed.
@@ -361,7 +388,7 @@ interface TemplateArgument {
 	 */
 	value: string;
 	/**
-	 * The argument's text created out of `name` and `value`, starting with a pipe character.
+	 * The argument's text created out of {@link TemplateArgument.name |name} and {@link value}, starting with a pipe character.
 	 *
 	 * Note that the name is not rendered for unnamed arguments.
 	 */
@@ -375,7 +402,7 @@ interface TemplateArgument {
 	 */
 	ufvalue: string;
 	/**
-	 * The argument's text created out of `ufname` and `ufvalue`, starting with a pipe character.
+	 * The argument's text created out of {@link ufname} and {@link ufvalue}, starting with a pipe character.
 	 *
 	 * Note that the name is not rendered for unnamed arguments.
 	 */
@@ -390,14 +417,17 @@ interface ArgumentHierarchy {
 	/**
 	 * Argument hierarchies.
 	 *
-	 * Module-invoking templates may have nested parameters (e.g. `{{#invoke|module|user={{{1|{{{user|}}}}}}}}`).
-	 * In such cases, pass `[['1', 'user'], [...]]`, and then `|1=` will be overridden by `|user=` when the
-	 * `Template` already has `|1=` as an argument.
+	 * Module-invoking templates may have nested parameters; for example, `{{#invoke:module|user={{{1|{{{user|}}}}}}}}`
+	 * can be transcluded as `{{template|user=value|1=value}}`. In this case, `|1=` and `|user=` should be regarded as
+	 * instantiating the same template argument, and any non-empty `|user=` argument should override the `|1=` argument
+	 * if any. To specify this type of argument hierarchies, pass `[['1', 'user'], [...]]`. Then, `|1=` will be
+	 * overridden by `|user=` any time when an argument registration takes place and the operation detects the presence
+	 * of a lower-hierarchy argument in the {@link Template} instance.
 	 */
 	hierarchy?: string[][];
 }
-/** The config object of the `Template` constructor. */
-interface ConstructorConfig extends ArgumentHierarchy {
+/** The config object to be passed to {@link Template.constructor}. */
+interface TemplateConfig extends ArgumentHierarchy {
 	/**
 	 * Full string that should fit into the first slot of the template (`{{fullName}}`), **excluding** double braces.
 	 * May contain whitespace characters (`{{ fullName }}`) and/or expressions that are not part of the template name
@@ -407,9 +437,9 @@ interface ConstructorConfig extends ArgumentHierarchy {
 }
 
 /**
- * The object that is an element of the array to specify what template arguments to add/update.
+ * The object that specifies what kind of a template argument should be added to {@link Template.args}.
  *
- * Used in `Template.addArgs` and `Template.setArgs`.
+ * Used in {@link Template.addArgs} and {@link Template.setArgs}.
  */
 interface NewArg {
 	/**
@@ -417,37 +447,55 @@ interface NewArg {
 	 * in accordance with the arguments that have already been registered.
 	 *
 	 * This property accepts leading/trailing spaces, for an output of e.g. `| 1 = value ` instead of `|1=value` (a config
-	 * object must be passed to `render` for this output).
+	 * object must be passed to {@link Template.render} for this output).
 	 */
 	name: string;
 	/**
 	 * The value of the new argument.
 	 *
 	 * This property accepts leading/trailing spaces, for an output of e.g. `| 1 = value ` instead of `|1=value` (a config
-	 * object must be passed to `render` for this output). It can also end with `\n` when the argument should have a linebreak
-	 * before the next argument or `}}` (although this should be regulated by the `linebreak` or `linebreakPredicate` option of
-	 * `render`).
+	 * object must be passed to {@link Template.render} for this output). It can also end with `\n` when the argument should
+	 * have a linebreak before the next argument or `}}` (although whether to add a new line should instead be specified by
+	 * passing {@link RenderOptions.linebreak} or {@link RenderOptions.linebreakPredicate} to {@link Template.render}).
 	 */
 	value: string;
 	/**
-	 * Forcibly register this (integer-named) argument as unnamed. Ignored if `name` (after being formatted) is not of an integer.
+	 * Forcibly register this (integer-named) argument as unnamed. Ignored if {@link NewArg.name|name} (after being formatted)
+	 * is not of an integer.
 	 */
 	forceUnnamed?: boolean;
 }
 
-/** The option object passed to `Template.getArg` and `Template.hasArg`. */
+/**
+ * Object used to process the argument hierarchies of a template.
+ */
+interface TemplateArgumentHierarchy {
+	/** The index number of {@link name} or its alias in {@link Template.keys}. */
+	index: number;
+	/** `1` if {@link name} is on a higher position than `key` is in the hierarchy, `-1` if lower, `0` if the same. */
+	priority: number;
+}
+
+/** The option object passed to {@link Template.getArg} and {@link Template.hasArg}. */
 interface GetArgOptions {
 	/**
-	 * Also check whether the argument with the matched name meets this condition predicate.
+	 * Check whether the argument with the matched name meets this condition predicate.
 	 * @param arg
 	 */
 	conditionPredicate?: (arg: TemplateArgument) => boolean;
 }
+/** The option object uniquely passed to {@link Template.getArg} (and not to {@link Template.hasArg}). */
+interface GetArgUniqueOptions {
+	/**
+	 * If `true`, look for the first match, instead of the last.
+	 */
+	findFirst?: boolean;
+}
 
-/** The option object passed to `Template.render`. */
+/** The option object passed to {@link Template.render}. */
 interface RenderOptions {
 	/**
-	 * Use the template name of this format. See `Template.getName` for details.
+	 * Use the template name of this format. See {@link Template.getName} for details.
 	 */
 	nameprop?: 'full'|'clean'|'fullclean';
 	/**
@@ -455,26 +503,28 @@ interface RenderOptions {
 	 */
 	subst?: boolean;
 	/**
-	 * For template arguments, use the unformatted counterpart(s) of `name` (i.e. `ufname`), `value` (i.e. `ufvalue`),
-	 * or both, instead of the formatted ones. Note that specifying this option disables the auto-rendering of the name
-	 * of an unnamed argument whose value contains a `=`.
+	 * For template arguments, use the unformatted counterpart(s) of {@link TemplateArgument.name |name} (i.e. 
+	 * {@link TemplateArgument.ufname |ufname}), {@link TemplateArgument.value |value} (i.e. {@link TemplateArgument.ufvalue |ufvalue}),
+	 * or both, instead of the formatted ones. Note that specifying this option disables the auto-rendering of
+	 * the name of an unnamed argument whose value contains a `=`.
 	 */
 	unformatted?: 'name'|'value'|'both';
 	/**
-	 * Callback function to `Array.prototype.sort`, called on the `args` array before stringifying the template arguments.
+	 * Callback function to {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort |Array.prototype.sort},
+	 * called on the {@link Template.args} array before stringifying the template arguments.
 	 * @param obj1
 	 * @param obj2
 	 */
 	sortPredicate?: (obj1: TemplateArgument, obj2: TemplateArgument) => number;
 	/**
-	 * Whether to break lines for each template slot. Overridden by `linebreakPredicate`.
+	 * Whether to break lines for each template slot. Overridden by {@link linebreakPredicate}.
 	 * 
 	 * Note that if this option is specified, all trailing `\n`s are first removed, and it is then evaluated whether to
 	 * add an `\n` at the end of the slot.
 	 */
 	linebreak?: boolean;
 	/**
-	 * Put a new line in accordance with this predicate. Prioritized than `linebreak`.
+	 * Put a new line in accordance with this predicate. Prioritized than {@link linebreak}.
 	 * 
 	 * Note that if this option is specified, all trailing `\n`s are first removed, and it is then evaluated whether to
 	 * add an `\n` at the end of the slot.
@@ -482,7 +532,7 @@ interface RenderOptions {
 	linebreakPredicate?: {
 		/**
 		 * Whether to put a new line after the first template slot for the name. `\n` is added if the callback is true.
-		 * @param name The template's name in accordance with `nameprop`.
+		 * @param name The template's name in accordance with {@link RenderOptions.nameprop}.
 		 */
 		name: (name: string) => boolean;
 		/**
@@ -493,7 +543,7 @@ interface RenderOptions {
 	};
 }
 
-/** The object returned by `Template.toJSON`. */
+/** The object returned by {@link Template.toJSON}. */
 interface TemplateJSON {
 	name: string;
 	fullName: string;
@@ -506,28 +556,28 @@ interface TemplateJSON {
 }
 
 /**
- * The `Template` class. Creates a new {{template}}.
+ * The Template class. Creates a new {{template}}.
  */
 class Template {
 
 	/**
-	 * Name of the page that is to be transcluded. Should not contain anything but a page title.
+	 * The trimmed `name` passed to the {@link Template.constructor |constructor}.
 	 * @readonly
 	 */
 	readonly name: string;
 	/**
-	 * Full string that fits into the first slot of the template (`{{fullName}}`). May be accompanied by additional
+	 * Full string that fits into the first slot of the template (i.e. `{{fullName}}`). May be accompanied by additional
 	 * characters that are not relevant to the title of the page to be transcluded.
 	 * @readonly
 	 */
 	readonly fullName: string;
 	/**
-	 * `name` formatted by `Title.newFromText`.
+	 * {@link Template.name |name} formatted by {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Title |mw.Title.newFromText}.
 	 * @readonly
 	 */
 	readonly cleanName: string;
 	/**
-	 * `cleanName` with redundancies as in `fullName`.
+	 * {@link cleanName} with redundancies as in {@link fullName}.
 	 * @readonly
 	 */
 	readonly fullCleanName: string;
@@ -548,20 +598,21 @@ class Template {
 	readonly overriddenArgs: TemplateArgument[];
 	/**
 	 * Argument hierarchies.
-	 * @private
+	 * @protected
 	 */
-	private readonly hierarchy: string[][];
+	protected readonly hierarchy: string[][];
 
 	/**
-	 * Initialize a new `Template` instance.
+	 * Initialize a new {@link Template} instance.
 	 *
 	 * @param name Name of the page that is to be transcluded. Should not contain anything but a page title.
 	 * @param config Optional initializer object.
-	 * @throws {Error} When `name` has inline `\n` characters or when`config.fullName` does not contain `name` as a substring.
+	 * @throws {Error} When `name` has inline `\n` characters or when {@link TemplateConfig.fullName |fullName}
+	 * does not contain `name` as a substring.
 	 * @requires mediawiki.Title
 	 * @requires mediawiki.util
 	 */
-	constructor(name: string, config?: ConstructorConfig) {
+	constructor(name: string, config?: TemplateConfig) {
 
 		const cfg = config || {};
 		this.name = clean(name);
@@ -606,10 +657,12 @@ class Template {
 	/**
 	 * Get the name of the template.
 	 *
-	 * @param prop By default, returns the original, unformatted `name` passed to #constructor.
-	 * - If `full` is passed, returns `fullName` passed to #constructor (same as `name` if none was passed).
-	 * - If `clean` is passed, returns `name` that is formatted.
-	 * - If `fullclean` is passed, returns `name` that is formatted and accompanied by redundancies as in `fullName`.
+	 * @param prop By default, returns the original, unformatted `name` passed to {@link Template.constructor}.
+	 * - If `full` is passed, returns {@link TemplateConfig.fullName |fullName} passed to {@link Template.constructor}
+	 * (same as `name` if none was passed).
+	 * - If `clean` is passed, returns {@link Template.name |name} that is formatted.
+	 * - If `fullclean` is passed, returns {@link Template.name |name} that is formatted and accompanied by redundancies
+	 * as in {@link TemplateConfig.fullName |fullName}.
 	 *
 	 * In specifying any of the above, the first letter is capitalized.
 	 *
@@ -645,7 +698,7 @@ class Template {
 	}
 
 	/**
-	 * Register template arguments into `Template.args`.
+	 * Register template arguments into {@link args}.
 	 *
 	 * @param newArgs An array of `{name: string; value: string;}` objects.
 	 * @param logOverride Whether to leave a log when overriding argument values.
@@ -728,12 +781,7 @@ class Template {
 	 * Check whether a given argument is to be hierarchically overridden.
 	 * @param name
 	 */
-	private getHier(name: string): {
-		/** The index number of `name` or its alias in `this.keys`. */
-		index: number;
-		/** `1` if `name` is on a higher position than `key` is in the hierarchy, `-1` if lower, `0` if the same. */
-		priority: number;
-	}|null {
+	private getHier(name: string): TemplateArgumentHierarchy|null {
 		let ret = null;
 		if (!this.hierarchy.length || !this.keys.length) {
 			return ret;
@@ -761,8 +809,8 @@ class Template {
 	}
 
 	/**
-	 * Add new arguments to the `Template` instance. This method leaves a log when argument override takes place,
-	 * which can be viewed by `getOverriddenArgs`.
+	 * Add new arguments to the {@link Template} instance. This method leaves a log when argument override takes place,
+	 * which can be viewed by {@link getOverriddenArgs}.
 	 *
 	 * @param newArgs An array of `{name: string; value: string;}` objects.
 	 */
@@ -772,9 +820,9 @@ class Template {
 	}
 
 	/**
-	 * Set (or update) arguments in(to) the `Template` instance. This method does not leave a log when argument override takes place.
+	 * Set (or update) arguments in(to) the {@link Template} instance. This method does not leave a log when argument override takes place.
 	 *
-	 * Note: New arguments are simply newly added, just as when `addArgs` is used.
+	 * Note: New arguments are simply newly added, just as when {@link addArgs} is used.
 	 *
 	 * @param newArgs An array of `{name: string; value: string;}` objects.
 	 */
@@ -786,7 +834,7 @@ class Template {
 	/**
 	 * Get the arguments of the template as an array of objects.
 	 *
-	 * @param deepCopy Whether to return a deep copy, defaulted to `true`. Otherwise, `Template.args` is passed by reference
+	 * @param deepCopy Whether to return a deep copy, defaulted to `true`. Otherwise, {@link args} is passed by reference
 	 * (not recommended).
 	 * @returns
 	 */
@@ -799,17 +847,12 @@ class Template {
 	}
 
 	/**
-	 * Get (a deep copy of) a template argument from an argument name.
+	 * Get (a deep copy of) a template argument by an argument name.
 	 * @param name Argument name.
 	 * @param options Optional search options.
 	 * @returns `null` if no argument is found with the specified name.
 	 */
-	getArg(name: string|RegExp, options?: GetArgOptions & {
-		/**
-		 * If true, look for the first match, instead of the last.
-		 */
-		findFirst?: boolean;
-	}): TemplateArgument|null {
+	getArg(name: string|RegExp, options?: GetArgOptions & GetArgUniqueOptions): TemplateArgument|null {
 
 		options = options || {};
 
@@ -833,7 +876,7 @@ class Template {
 	}
 
 	/**
-	 * Check whether the `Template` instance has an argument with a certain name.
+	 * Check whether the {@link Template} instance has an argument with a certain name.
 	 * @param name Name of the argument to search for.
 	 * @param options Optional search options.
 	 * @returns A boolean value in accordance with whether there is a match.
@@ -870,7 +913,8 @@ class Template {
 	/**
 	 * Delete a template argument.
 	 * @param name
-	 * @returns true if an element in the `args` existed and has been removed, or false if the element does not exist.
+	 * @returns `true` if the instance has an argument with the specified name and if the argument is successfully removed,
+	 * `false` otherwise.
 	 */
 	deleteArg(name: string): boolean {
 		let deleted = false;
@@ -900,7 +944,7 @@ class Template {
 	}
 
 	/**
-	 * Render the `Template` instance as wikitext.
+	 * Render the {@link Template} instance as wikitext.
 	 *
 	 * Use `render({nameprop: 'full', unformatted: 'both'})` for an output that is closest to the original configurations.
 	 *
@@ -963,7 +1007,7 @@ class Template {
 	}
 
 	/**
-	 * Stringify the `Template` instance. Same as `render({nameprop: 'full', unformatted: 'both'})`.
+	 * Stringify the {@link Template} instance. Same as `render({nameprop: 'full', unformatted: 'both'})`.
 	 */
 	toString(): string {
 		return this.render({nameprop: 'full', unformatted: 'both'});
@@ -987,7 +1031,10 @@ class Template {
 
 }
 
-/** The object that is passed to the `ParsedTemplate` constructor. */
+/** 
+ * The object that is passed to {@link ParsedTemplate.constructor}.
+ * @internal
+ */
 interface ParsedTemplateParam extends ArgumentHierarchy {
 	name: string;
 	fullName: string;
@@ -998,35 +1045,56 @@ interface ParsedTemplateParam extends ArgumentHierarchy {
 	nestLevel: number;
 }
 
-/** Class used by `Wikitext.parseTemplates`. */
+/** Part of the object passed to the second parameter of {@link ParsedTemplate.replaceIn}. */
+interface ReplaceInOptions {
+	/**
+	 * Replace the original template with this string.
+	 *
+	 * Default: {@link ParsedTemplate.render}(options)
+	 */
+	with?: string;
+	/**
+	 * If `true` (default), replacement takes place only if the passed wikitext has the original template
+	 * starting at {@link ParsedTemplate._startIndex} and ending (exclusively) at {@link ParsedTemplate._endIndex}.
+	 * This prevents a nonparsed template in a transclusion-preventing tag from being wrongly replaced
+	 * ({@link Wikitext.parseTemplates} does not parse templates inside the relevant tags).
+	 * ```
+	 * const wikitext = '<!--{{Template}}-->\n{{Template}}'; // The second one is parsed
+	 * const Wkt = new Wikitext(wikitext);
+	 * const Temps = Wkt.parseTemplates(); // Temps[0]: ParsedTemplate, Temps[1]: undefined
+	 * const newWikitext1 = Temps[0].replaceIn(wikitext, {with: ''});
+	 * const newWikitext2 = Temps[0].replaceIn(wikitext, {with: '', useIndex: false});
+	 * console.log(newWikitext1); // '<!--{{Template}}-->', expected result
+	 * console.log(newWikitext2); // '<!---->\n{{Template}}', unexpected result
+	 * ```
+	 */
+	useIndex?: boolean;
+}
+
+/** Class used by {@link Wikitext.parseTemplates}. */
 class ParsedTemplate extends Template {
 
-	/**
-	 * Argument hierarchies.
-	 * @private
-	 */
-	private phierarchy: string[][];
 	/**
 	 * The original text of the template.
 	 * @readonly
 	 */
 	readonly originalText: string;
 	/**
-	 * **CAUTION**: Pseudo-private property. Use `ParsedTemplate.getStartIndex` to get this property's value.
+	 * **CAUTION**: Pseudo-private property. Use {@link getStartIndex} to get this property's value.
 	 * 
 	 * The index to the start of the template in the wikitext out of which the template was parsed.
 	 * 
 	 * Note that this property is made private-like because it shouldn't be modified externally, but sometimes
-	 * `Wikitext.parseTemplates` needs to modify this property, from outside this class.
+	 * {@link Wikitext.parseTemplates} needs to modify this property, from outside this class.
 	 */
 	_startIndex: number;
 	/**
-	 * **CAUTION**: Pseudo-private property. Use `ParsedTemplate.getEndIndex` to get this property's value.
+	 * **CAUTION**: Pseudo-private property. Use {@link getEndIndex} to get this property's value.
 	 * 
 	 * The index up to, but not including, the end of the template in the wikitext out of which the template was parsed.
 	 * 
 	 * Note that this property is made private-like because it shouldn't be modified externally, but sometimes
-	 * `Wikitext.parseTemplates` needs to modify this property, from outside this class.
+	 * {@link Wikitext.parseTemplates} needs to modify this property, from outside this class.
 	 */
 	_endIndex: number;
 	/**
@@ -1035,14 +1103,14 @@ class ParsedTemplate extends Template {
 	readonly nestLevel: number;
 
 	/**
-	 * Initialize a new `ParsedTemplate` instance.
+	 * Initialize a new {@link ParsedTemplate} instance. **This constructor is not supposed to be used externally**.
 	 * @param parsed
-	 * @throws {Error} When `name` has inline `\n` characters or when`config.fullName` does not contain `name` as a substring.
+	 * @throws {Error} When `name` has inline `\n` characters or when {@link TemplateConfig.fullName |fullName}
+	 * does not contain `name` as a substring.
 	 */
 	constructor(parsed: ParsedTemplateParam) {
 		const {name, fullName, args, text, startIndex, endIndex, hierarchy, nestLevel} = parsed;
 		super(name, {fullName, hierarchy});
-		this.phierarchy = super.getHierarchy();
 		this.addArgs(args.map((obj) => ({'name': obj.name.replace(/^\|/, ''), value: obj.value.replace(/^\|/, '')})));
 		this.originalText = text;
 		this._startIndex = startIndex;
@@ -1051,7 +1119,7 @@ class ParsedTemplate extends Template {
 	}
 
 	/**
-	 * Error-proof constructor.
+	 * Error-proof constructor. **This method is supposed to be used only by {@link Wikitext.parseTemplates}**.
 	 * @param parsed
 	 * @returns `null` if the constructor threw an error.
 	 */
@@ -1081,20 +1149,12 @@ class ParsedTemplate extends Template {
 			args: this.args.map(obj => ({...obj})),
 			keys: this.keys.slice(),
 			overriddenArgs: this.overriddenArgs.map(obj => ({...obj})),
-			hierarchy: this.phierarchy.map(arr => [...arr]),
+			hierarchy: this.hierarchy.map(arr => [...arr]),
 			originalText: this.originalText,
 			startIndex: this._startIndex,
 			endIndex: this._endIndex,
 			nestLevel: this.nestLevel
 		};
-	}
-
-	/**
-	 * Get the argument hierarchies.
-	 * @returns
-	 */
-	getHierarchy(): string[][] {
-		return this.phierarchy.map(arr => [...arr]);
 	}
 
 	/**
@@ -1106,7 +1166,7 @@ class ParsedTemplate extends Template {
 	}
 
 	/**
-	 * Get `ParsedTemplate._startIndex`.
+	 * Get {@link _startIndex}.
 	 * @returns
 	 */
 	getStartIndex(): number {
@@ -1114,7 +1174,7 @@ class ParsedTemplate extends Template {
 	}
 
 	/**
-	 * Get `ParsedTemplate._endIndex`.
+	 * Get {@link _endIndex}.
 	 * @returns
 	 */
 	getEndIndex(): number {
@@ -1131,44 +1191,21 @@ class ParsedTemplate extends Template {
 
 	/**
 	 * Find the original template in a wikitext and replace it with the (updated) template obtained by
-	 * `ParsedTemplate.render(options)`. This method is supposed to be called on a wiktiext same as the one
-	 * from which the `ParsedTemplate` instance was parsed and initialized.
+	 * {@link render}. This method is supposed to be called on a wiktiext same as the one from which the
+	 * {@link ParsedTemplate} instance was parsed and initialized.
 	 * 
-	 * Note that if this method is called recursively against an array of `ParsedTemplate`, the looped array
-	 * needs to be reversed so that the replacement takes place from the bottom of the wikitext. This is because
-	 * the method reads the start and end indexes of the original template before the replacement (unless `useIndex`
-	 * is set to `false`), and if the replacement is done in a top-down fashion, the indexes change and the subsequent
-	 * replacements are affected.
+	 * Note that if this method is called recursively against an array of {@link ParsedTemplate}, the looped array needs to be
+	 * reversed so that the replacement takes place from the bottom of the wikitext. This is because the method reads the start
+	 * and end indexes of the original template before the replacement (unless {@link ReplaceInOptions.useIndex|useIndex} is set
+	 * to `false`), and if the replacement is done in a top-down fashion, the indexes change and the subsequent replacements are
+	 * affected.
 	 *
 	 * @param wikitext Wikitext in which to search for the original template.
 	 * @param options Optional object to specify rendering and replacement options.
-	 * @returns New wikitext with the original template replaced. (Could be the same as the input wikitext
-	 * if the replacement didn't take place.)
+	 * @returns New wikitext with the original template replaced. (Could be the same as the input wikitext if the replacement
+	 * didn't take place.)
 	 */
-	replaceIn(wikitext: string, options?: RenderOptions & {
-		/**
-		 * Replace the original template with this string.
-		 *
-		 * Default: `ParsedTemplate.render(options)`
-		 */
-		with?: string;
-		/**
-		 * If `true` (default), replacement takes place only if the passed wikitext has the original template
-		 * starting at `ParsedTemplate._startIndex` and ending (exclusively) at `ParsedTemplate._endIndex`.
-		 * This prevents a nonparsed template in a transclusion-preventing tag from being wrongly replaced
-		 * (`Wikitext.parseTemplates` does not parse templates inside the relevant tags).
-		 * ```
-		 * const wikitext = '<!--{{Template}}-->\n{{Template}}'; // The second one is parsed
-		 * const Wkt = new Wikitext(wikitext);
-		 * const Temps = Wkt.parseTemplates(); // Temps[0]: ParsedTemplate, Temps[1]: undefined
-		 * const newWikitext1 = Temps[0].replaceIn(wikitext, {with: ''});
-		 * const newWikitext2 = Temps[0].replaceIn(wikitext, {with: '', useIndex: false});
-		 * console.log(newWikitext1); // '<!--{{Template}}-->', expected result
-		 * console.log(newWikitext2); // '<!---->\n{{Template}}', unexpected result
-		 * ```
-		 */
-		useIndex?: boolean;
-	}): string {
+	replaceIn(wikitext: string, options?: RenderOptions & ReplaceInOptions): string {
 
 		const cfg = Object.assign({useIndex: true}, options || {});
 		const replacer = typeof cfg.with === 'string' ? cfg.with : this.render(cfg);
@@ -1193,7 +1230,7 @@ class ParsedTemplate extends Template {
 
 }
 
-/** The object that stores revision information fetched by `Wikitext.fetch`. */
+/** The object that stores revision information fetched by {@link Wikitext.fetch}. */
 interface Revision {
 	/** The ID of the page. */
 	pageid: number;
@@ -1215,10 +1252,10 @@ interface Revision {
 	redirect: boolean;
 }
 
-/** The object that is an element of the returned array of `Wikitext.parseTags`. */
+/** The object that is an element of the return array of {@link Wikitext.parseTags}. */
 interface Tag {
 	/**
-	 * The name of the tag in lowercase (`comment` for a `<!---->` tag).
+	 * The name of the tag in lowercase (for `<!---->` tags, the name is `comment`).
 	 */
 	name: string;
 	/**
@@ -1250,7 +1287,7 @@ interface Tag {
 	 */
 	nestLevel: number;
 }
-/** The parsing config of `Wikitext.parseTags`. */
+/** The parsing config of {@link Wikitext.parseTags}. */
 interface ParseTagsConfig {
 	/**
 	 * Only include \<tag>s that match this predicate.
@@ -1260,7 +1297,7 @@ interface ParseTagsConfig {
 	conditionPredicate?: (tag: Tag) => boolean;
 }
 
-/** The object that is an element of the returned array of `Wikitext.parseSections`. */
+/** The object that is an element of the return array of {@link Wikitext.parseSections}. */
 interface Section {
 	/**
 	 * The title of the section. Could be different from the result of `action=parse` if it contains HTML tags or templates.
@@ -1295,7 +1332,7 @@ interface Section {
 	content: string;
 }
 
-/** The object that is an element of the returned array of `Wikitext.parseParameters`. */
+/** The object that is an element of the return array of {@link Wikitext.parseParameters}. */
 interface Parameter {
 	/**
 	 * The entire text of the parameter.
@@ -1314,7 +1351,7 @@ interface Parameter {
 	 */
 	nestLevel: number;
 }
-/** The parsing config of `Wikitext.parseParameters`. */
+/** The parsing config of {@link Wikitext.parseParameters}. */
 interface ParseParametersConfig {
 	/**
 	 * Whether to parse {{{parameter}}}s inside another {{{parameter}}}.
@@ -1323,25 +1360,25 @@ interface ParseParametersConfig {
 	 */
 	recursive?: boolean;
 	/**
-	 * Only include {{{parameter}}}s that match this predicate. Note that this predicate is evaluated after evaluating
-	 * the value of the `recursive` config, meaning that if it's set to `false`, the predicate is evaluated only against
-	 * {{{parameter}}}s with the `nestLevel` property of `0`.
+	 * Only include {{{parameter}}}s that match this predicate. Note that this predicate is evaluated after the {@link recursive} config.
+	 * For this reason, it had better not specify both of the configs simultaneously, but rather include a condition to see if the callback
+	 * function's parameter of {@link Parameter.nestLevel|nestLevel} has the value of `0`.
 	 * @param parameter
 	 * @returns
 	 */
 	conditionPredicate?: (parameter: Parameter) => boolean;
 }
 
-/** The parsing config of `Wikitext.parseTemplates`. */
+/** The parsing config of {@link Wikitext.parseTemplates}. */
 interface ParseTemplatesConfig extends ArgumentHierarchy {
 	/**
 	 * Only parse templates whose names match this predicate.
-	 * @param name The name of the parsed template, which is the same as `ParsedTemplate.getName('clean')`.
+	 * @param name The name of the parsed template, which is the same as {@link ParsedTemplate.getName}('clean')`.
 	 */
 	namePredicate?: (name: string) => boolean;
 	/**
-	 * Only parse templates whose `ParsedTemplate` instances match this predicate. Can be used together with `namePredicate`,
-	 * although this predicate is evaluated after evaluating `namePredicate`.
+	 * Only parse templates whose {@link ParsedTemplate} instances match this predicate. Can be used together with
+	 * {@link namePredicate}, although this predicate is evaluated after evaluating {@link namePredicate}.
 	 * @param Template
 	 */
 	templatePredicate?: (Template: ParsedTemplate) => boolean;
@@ -1349,55 +1386,54 @@ interface ParseTemplatesConfig extends ArgumentHierarchy {
 	 * Parse nested templates in accordance with this predicate.
 	 *
 	 * Default: Always parse nested templates
-	 * @param Template Can be `null` if `ParsedTemplate.prototype.constructor` has thrown an error.
+	 * @param Template Can be `null` if {@link ParsedTemplate.constructor} has thrown an error.
 	 */
 	recursivePredicate?: (Template: ParsedTemplate|null) => boolean;
 	/**
-	 * Private parameter used to determine the value of the `nestLevel` property of `ParsedTemplate`.
+	 * Private parameter used to determine the value of {@link ParsedTemplate.nestLevel}.
+	 * @private
 	 */
 	_nestLevel?: number;
 }
 
-/**
- * The `Wikitext` class with methods to manipulate wikitext.
- */
+/** The Wikitext class with methods to manipulate wikitext. */
 class Wikitext {
 
 	/**
-	 * The wikitext from which the `Wikitext` instance was initialized.
+	 * The wikitext from which the {@link Wikitext} instance was initialized.
 	 */
 	readonly wikitext: string;
 	/**
-	 * Stores the return value of `Wikitext.fetch` when a `Wikitext` instance is created by `Wikitext.newFromTitle`.
+	 * Stores the return value of {@link Wikitext.fetch|fetch} when a {@link Wikitext} instance is created by {@link newFromTitle}.
 	 *
-	 * A deep copy can be retrieved by `Wikitext.getRevision`.
+	 * A deep copy can be retrieved by {@link getRevision}.
 	 * @private
 	 */
 	private revision: Revision|null;
 	/**
-	 * Stores the return value of `Wikitext.parseTags`.
+	 * Stores the return value of {@link parseTags}.
 	 *
-	 * A deep copy can be retrieved by `Wikitext.getTags`.
+	 * A deep copy can be retrieved by {@link getTags}.
 	 * @private
 	 */
 	private tags: Tag[]|null;
 	/**
-	 * Stores the return value of `Wikitext.parseSections`.
+	 * Stores the return value of {@link parseSections}.
 	 *
-	 * A deep copy can be retrieved by `Wikitext.getSections`.
+	 * A deep copy can be retrieved by {@link getSections}.
 	 * @private
 	 */
 	private sections: Section[]|null;
 	/**
-	 * Stores the return value of `Wikitext.parseParameters`.
+	 * Stores the return value of {@link parseParameters}.
 	 *
-	 * A deep copy can be retrieved by `Wikitext.getParameters`.
+	 * A deep copy can be retrieved by {@link getParameters}.
 	 * @private
 	 */
 	private parameters: Parameter[]|null;
 
 	/**
-	 * Initialize a `Wikitext` instance.
+	 * Initialize a {@link Wikitext} instance.
 	 * @param wikitext
 	 * @requires mediawiki.Api
 	 */
@@ -1410,7 +1446,7 @@ class Wikitext {
 	}
 
 	/**
-	 * Returns the length of the wikitext referring to which the `Wikitext` instance was initialized.
+	 * Returns the length of the wikitext.
 	 */
 	get length(): number {
 		return this.wikitext.length;
@@ -1466,7 +1502,7 @@ class Wikitext {
 	}
 
 	/**
-	 * Fetch the wikitext of a page. If additional revision information should be included, use `Wikitext.fetch`.
+	 * Fetch the wikitext of a page. If additional revision information should be included, use {@link Wikitext.fetch|fetch}.
 	 * @param pagetitle
 	 * @returns `false` if the page doesn't exist, `null` if the API request failed.
 	 * @requires mediawiki.Api
@@ -1476,7 +1512,7 @@ class Wikitext {
 	}
 
 	/**
-	 * Initialize a new `Wikitext` instance by fetching the content of a page.
+	 * Initialize a new {@link Wikitext} instance by fetching the content of a page.
 	 * @param pagetitle
 	 * @returns `false` if the page doesn't exist, `null` if the content of the page failed to be fetched.
 	 * @requires mediawiki.Api
@@ -1494,9 +1530,9 @@ class Wikitext {
 	}
 
 	/**
-	 * Get a deep copy of `Wikitext.revision`, which is a private property available only when the `Wikitext` instance was initialized
-	 * by `Wikitext.newFromTitle`.
-	 * @returns `null` if the instance doesn't have the relevant property, meaning that it wasn't initialized by `Wikitext.newFromTitle`.
+	 * Get a deep copy of {@link revision}, which is a private property available only when the {@link Wikitext} instance was initialized
+	 * by {@link newFromTitle}.
+	 * @returns `null` if the instance doesn't have the relevant property, meaning that it wasn't initialized by {@link newFromTitle}.
 	 */
 	getRevision(): Revision|null {
 		return this.revision && {...this.revision};
@@ -1664,8 +1700,8 @@ class Wikitext {
 	}
 
 	/**
-	 * Get a deep copy of `Wikitext.tags`, which is a private property available only when `Wikitext.parseTags` has
-	 * been called at least once. Note that `Wikitext.parseTags` returns a (filtered) deep copy of `Wikitext.tags`
+	 * Get a deep copy of {@link tags}, which is a private property available only when {@link parseTags} has
+	 * been called at least once. Note that {@link parseTags} returns a (filtered) deep copy of {@link tags}
 	 * on a non-first call, so simply call the relevant method if there is no need for a `null` return.
 	 * @returns
 	 */
@@ -1675,7 +1711,7 @@ class Wikitext {
 
 	/**
 	 * Check whether a substring of the wikitext starting and ending at a given index is inside any transclusion-preventing tag.
-	 * @param tpTags An array of transclusion-preventing tags fetched by `Wikitext.parseTags`.
+	 * @param tpTags An array of transclusion-preventing tags fetched by {@link parseTags}.
 	 * @param startIndex The start index of the string in the wikitext.
 	 * @param endIndex The end index of the string in the wikitext.
 	 * @returns
@@ -1821,8 +1857,8 @@ class Wikitext {
 	}
 
 	/**
-	 * Get a deep copy of `Wikitext.sections`, which is a private property available only when `Wikitext.parseSections` has
-	 * been called at least once. Note that `Wikitext.parseSections` returns a (filtered) deep copy of `Wikitext.sections`
+	 * Get a deep copy of {@link sections}, which is a private property available only when {@link parseSections} has
+	 * been called at least once. Note that {@link parseSections} returns a (filtered) deep copy of {@link sections}
 	 * on a non-first call, so simply call the relevant method if there is no need for a `null` return.
 	 * @returns
 	 */
@@ -1930,8 +1966,8 @@ class Wikitext {
 	}
 
 	/**
-	 * Get a deep copy of `Wikitext.parameters`, which is a private property available only when `Wikitext.parseParameters` has
-	 * been called at least once. Note that `Wikitext.parseParameters` returns a (filtered) deep copy of `Wikitext.parameters`
+	 * Get a deep copy of {@link parameters}, which is a private property available only when {@link parseParameters} has
+	 * been called at least once. Note that {@link parseParameters} returns a (filtered) deep copy of {@link parameters}
 	 * on a non-first call, so simply call the relevant method if there is no need for a `null` return.
 	 * @returns
 	 */
@@ -2063,6 +2099,7 @@ class Wikitext {
 
 // Helper function for Wikitext class
 
+/** @internal */
 interface ParsedArgument {
 	/**
 	 * The whole text of the template argument (e.g. `|1=value`).
@@ -2078,6 +2115,7 @@ interface ParsedArgument {
 	 */
 	value: string;
 }
+/** @internal */
 interface FragmentOptions {
 	/** Whether the passed fragment can be part of the name of the template. */
 	nonname?: boolean;
@@ -2086,9 +2124,9 @@ interface FragmentOptions {
 }
 /**
  * Incrementally process fragments of template arguments. This function has no return value, and the original array
- * passed as `args` is modified.
+ * passed as {@link args} is modified.
  *
- * The `args` array will consist of:
+ * The {@link args} array will consist of:
  * ```
  * const [name, ...params] = args;
  * ```
@@ -2100,8 +2138,9 @@ interface FragmentOptions {
  * problems if an unnamed argument has a value that starts with `=` (e.g. `{{Template|=}}`).
  *
  * @param args Pass-by-reference array that stores the arguments of the template that is getting parsed.
- * @param fragment Character(s) to register into the `args` array.
+ * @param fragment Character(s) to register into the {@link args} array.
  * @param options Optional object that characterizes the fragment.
+ * @internal
  */
 function processArgFragment(args: ParsedArgument[], fragment: string, options?: FragmentOptions): void {
 	options = options || {};
@@ -2125,7 +2164,9 @@ function processArgFragment(args: ParsedArgument[], fragment: string, options?: 
 	}
 }
 
-return {
+// **************************************************** EXPORTS ****************************************************
+
+module.exports = {
 	load,
 	sleep,
 	continuedRequest,
@@ -2136,14 +2177,3 @@ return {
 	Template,
 	Wikitext
 };
-
-// ********************************************************************************************************
-})();
-
-// **************************************************** EXPORTS ****************************************************
-try {
-	module.exports = wikiLib;
-}
-catch (err) {
-	// Do nothing
-}

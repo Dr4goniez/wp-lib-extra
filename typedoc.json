@@ -1,9 +1,10 @@
 {
 	"name": "wikiLib",
+	"out": "./docs",
 	"includeVersion": true,
 	"entryPoints": ["./src/wikiLib.ts"],
-	"excludePrivate": true,
 	"excludeInternal": true,
 	"tsconfig": "tsconfig.json",
-	"exclude": ["node_modules"]
+	"exclude": ["node_modules"],
+	"darkHighlightTheme": "dark-plus"
 }

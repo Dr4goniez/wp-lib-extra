@@ -1,12 +1,12 @@
 {
 	"name": "wiki-gadgets",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"description": "Gadgets on Japanese Wikipedia.",
 	"main": "index.js",
 	"scripts": {
 		"test": "start",
 		"build": "tsc -p .",
-		"docs": "typedoc --options typedoc.json --plugin typedoc-plugin-missing-exports"
+		"docs": "typedoc --options typedoc.json"
 	},
 	"repository": {
 		"type": "git",
@@ -26,7 +26,6 @@
 		"@typescript-eslint/parser": "^6.7.3",
 		"eslint": "^8.50.0",
 		"typedoc": "^0.25.1",
-		"typedoc-plugin-missing-exports": "^2.1.0",
 		"types-mediawiki": "^1.4.0",
 		"typescript": "^5.2.2"
 	}
