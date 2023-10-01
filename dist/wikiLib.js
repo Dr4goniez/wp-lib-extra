@@ -1,4 +1,5 @@
 "use strict";
+// <nowiki>
 /**
  * @packageDocumentation
  * `wikiLib` is a function library prepared as a gadget on the Japanese Wikipedia.
@@ -1602,3 +1603,4 @@ module.exports = {
     Template: Template,
     Wikitext: Wikitext
 };
+// </nowiki>
