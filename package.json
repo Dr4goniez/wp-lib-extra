@@ -1,10 +1,9 @@
 {
 	"name": "wiki-gadgets",
-	"version": "0.0.6",
+	"version": "1.0.0",
 	"description": "Gadgets on Japanese Wikipedia.",
 	"main": "index.js",
 	"scripts": {
-		"test": "start",
 		"build": "tsc -p .",
 		"docs": "typedoc --options typedoc.json"
 	},

@@ -4,7 +4,7 @@
  * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-wikiLib.js}
  * 
  * This library is best characterized by its {@link Wikitext} class, which provides various interfaces to parse
- * wikitext, supplementing functionalities that built-in JavaScript libraries of MediaWiki lack.
+ * wikitext, supplementing functionalities lacking in built-in JavaScript libraries of MediaWiki.
  * 
  * How to use this library:
  * ```
@@ -12,14 +12,14 @@
  * var wikiLib = require('./wikiLib.js');
  * ```
  * ```
- * // In user scripts
+ * // In local non-gadget scripts
  * var moduleName = 'ext.gadget.wikiLib';
  * mw.loader.using(moduleName, function(require) {
  * 	var wikiLib = require(moduleName);
  * });
  * ```
  * ```
- * // In user scripts (on a foreign project)
+ * // In non-local scripts
  * var moduleName = 'ext.gadget.wikiLib';
  * var moduleUrl = '//ja.wikipedia.org/w/load.php?modules=' + moduleName;
  * mw.loader.getScript(moduleUrl).then(function() {

@@ -5,6 +5,5 @@
 	"entryPoints": ["./src/wikiLib.ts"],
 	"excludeInternal": true,
 	"tsconfig": "tsconfig.json",
-	"exclude": ["node_modules"],
-	"darkHighlightTheme": "dark-plus"
+	"exclude": ["node_modules"]
 }
