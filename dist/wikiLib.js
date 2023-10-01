@@ -16,7 +16,7 @@
  * ```
  * // In local non-gadget scripts
  * var moduleName = 'ext.gadget.wikiLib';
- * mw.loader.using(moduleName, function(require) {
+ * mw.loader.using(moduleName).then(function(require) {
  * 	var wikiLib = require(moduleName);
  * });
  * ```
@@ -175,18 +175,20 @@ if (!String.prototype.repeat) {
  * Load all the modules that this library depends on.
  * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Title |mediawiki.Title}
  * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.util |mediawiki.util}
- * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Api |mediawiki.Api}
- * @returns
+ * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Api |mediawiki.api}
+ * @returns `true` on success, `false` on failure.
  */
 function load() {
-    var def = $.Deferred();
-    var modules = [
+    return mw.loader.using([
         'mediawiki.Title',
         'mediawiki.util',
-        'mediawiki.Api'
-    ];
-    mw.loader.using(modules).then(def.resolve);
-    return def.promise();
+        'mediawiki.api'
+    ])
+        .then(function () { return true; })
+        .catch(function (err) {
+        console.warn(err);
+        return false;
+    });
 }
 /**
  * Let the code sleep for `n` milliseconds.
@@ -203,7 +205,7 @@ function sleep(milliseconds) {
  * @param params
  * @param limit Default: 10
  * @returns The return array might have `null` elements if any internal API request failed.
- * @requires mediawiki.Api
+ * @requires mediawiki.api
  */
 function continuedRequest(params, limit) {
     if (limit === void 0) { limit = 10; }
@@ -251,7 +253,7 @@ function continuedRequest(params, limit) {
  * @returns
  * Always an array: Elements are either `ApiResponse` (success) or `null` (failure). If the multi-value field is an empty array,
  * the return array will also be empty.
- * @requires mediawiki.Api
+ * @requires mediawiki.api
  */
 function massRequest(params, batchParams, apilimit) {
     // Initialize variables
@@ -914,7 +916,7 @@ var Wikitext = /** @class */ (function () {
     /**
      * Initialize a {@link Wikitext} instance.
      * @param wikitext
-     * @requires mediawiki.Api
+     * @requires mediawiki.api
      */
     function Wikitext(wikitext) {
         this.wikitext = wikitext;
@@ -948,7 +950,7 @@ var Wikitext = /** @class */ (function () {
      * Fetch the wikitext of a page with additional information on the current revision.
      * @param pagetitle
      * @returns `false` if the page doesn't exist, `null` if the API request failed.
-     * @requires mediawiki.Api
+     * @requires mediawiki.api
      */
     Wikitext.fetch = function (pagetitle) {
         return new mw.Api().get({
@@ -990,7 +992,7 @@ var Wikitext = /** @class */ (function () {
      * Fetch the wikitext of a page. If additional revision information should be included, use {@link Wikitext.fetch|fetch}.
      * @param pagetitle
      * @returns `false` if the page doesn't exist, `null` if the API request failed.
-     * @requires mediawiki.Api
+     * @requires mediawiki.api
      */
     Wikitext.read = function (pagetitle) {
         return Wikitext.fetch(pagetitle).then(function (res) { return res && res.content; });
@@ -999,7 +1001,7 @@ var Wikitext = /** @class */ (function () {
      * Initialize a new {@link Wikitext} instance by fetching the content of a page.
      * @param pagetitle
      * @returns `false` if the page doesn't exist, `null` if the content of the page failed to be fetched.
-     * @requires mediawiki.Api
+     * @requires mediawiki.api
      */
     Wikitext.newFromTitle = function (pagetitle) {
         return Wikitext.fetch(pagetitle).then(function (revision) {
