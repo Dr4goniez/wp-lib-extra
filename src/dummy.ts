@@ -18,18 +18,21 @@ export {};
 
 // 5. Add the following to the bottom of dist/wp-lib-extra.d.ts
 
-/** The object exported by `wp-lib-extra`. */
-// interface WpLibExtra {
-// 	load: typeof load;
-// 	sleep: typeof sleep;
-// 	continuedRequest: typeof continuedRequest;
-// 	massRequest: typeof massRequest;
-// 	clean: typeof clean;
-// 	arraysEqual: typeof arraysEqual;
-// 	arraysDiff: typeof arraysDiff;
-// 	Template: typeof Template;
-// 	Wikitext: typeof Wikitext;
+/** The object exported by `ext.gadget.WpLibExtra`. */
+// declare global {
+//     interface WpLibExtra {
+//         load: typeof load;
+//         sleep: typeof sleep;
+//         continuedRequest: typeof continuedRequest;
+//         massRequest: typeof massRequest;
+//         clean: typeof clean;
+//         arraysEqual: typeof arraysEqual;
+//         arraysDiff: typeof arraysDiff;
+//         Template: typeof Template;
+//         Wikitext: typeof Wikitext;
+//     }
 // }
+// export {};
 
 // (Add the following to the top of MediaWiki:Gadget-WpLibExtra.js)
 /**

@@ -951,15 +951,18 @@ interface FragmentOptions {
  */
 declare function processArgFragment(args: ParsedArgument[], fragment: string, options?: FragmentOptions): void;
 
-/** The object exported by `wp-lib-extra`. */
-interface WpLibExtra {
-	load: typeof load;
-	sleep: typeof sleep;
-	continuedRequest: typeof continuedRequest;
-	massRequest: typeof massRequest;
-	clean: typeof clean;
-	arraysEqual: typeof arraysEqual;
-	arraysDiff: typeof arraysDiff;
-	Template: typeof Template;
-	Wikitext: typeof Wikitext;
+/** The object exported by `ext.gadget.WpLibExtra`. */
+declare global {
+    interface WpLibExtra {
+        load: typeof load;
+        sleep: typeof sleep;
+        continuedRequest: typeof continuedRequest;
+        massRequest: typeof massRequest;
+        clean: typeof clean;
+        arraysEqual: typeof arraysEqual;
+        arraysDiff: typeof arraysDiff;
+        Template: typeof Template;
+        Wikitext: typeof Wikitext;
+    }
 }
+export {};
