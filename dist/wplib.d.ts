@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
- * `wikilib` is a function library prepared as a gadget on the Japanese Wikipedia.
- * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-wikilib.js}
+ * `wplib` is a function library prepared as a gadget on the Japanese Wikipedia.
+ * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-wplib.js}
  *
  * This library is best characterized by its {@link Wikitext} class, which provides various interfaces to parse
  * wikitext, supplementing functionalities lacking in built-in JavaScript libraries of MediaWiki.
@@ -9,22 +9,22 @@
  * How to use this library:
  * ```
  * // In gadgets
- * var wikilib = require('./wikilib.js');
+ * var wplib = require('./wplib.js');
  * ```
  * ```
  * // In local non-gadget scripts
- * var moduleName = 'ext.gadget.wikilib';
+ * var moduleName = 'ext.gadget.wplib';
  * mw.loader.using(moduleName).then(function(require) {
- * 	var wikilib = require(moduleName);
+ * 	var wplib = require(moduleName);
  * });
  * ```
  * ```
  * // In non-local scripts
- * var moduleName = 'ext.gadget.wikilib';
+ * var moduleName = 'ext.gadget.wplib';
  * var moduleUrl = '//ja.wikipedia.org/w/load.php?modules=' + moduleName;
  * mw.loader.getScript(moduleUrl).then(function() {
  * 	mw.loader.using(moduleName).then(function(require) {
- * 		var wikilib = require(moduleName);
+ * 		var wplib = require(moduleName);
  * 	});
  * });
  * ```
@@ -48,7 +48,7 @@
 //      */
 //     ucFirst: (string: string) => string;
 // }
-/** @internal */
+// /** @internal */
 // declare const mwString: MwString;
 /**
  * Load all the modules that this library depends on.
@@ -951,8 +951,8 @@ interface FragmentOptions {
  */
 declare function processArgFragment(args: ParsedArgument[], fragment: string, options?: FragmentOptions): void;
 
-/** The object exported by `wikilib`. */
-interface WikiLib {
+/** The object exported by `wplib`. */
+interface WpLib {
 	load: typeof load;
 	sleep: typeof sleep;
 	continuedRequest: typeof continuedRequest;

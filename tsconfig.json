@@ -100,6 +100,5 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/*", "./node_modules/types-mediawiki"],
-  "exclude": ["src/test.ts", "src/dummy.ts"]
+  "include": ["src/wplib.ts", "./node_modules/types-mediawiki"]
 }

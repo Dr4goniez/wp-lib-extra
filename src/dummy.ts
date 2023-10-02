@@ -1,25 +1,25 @@
-// This file just contains comments to be added to the top of the transpiled version of wikilib
+// This file just contains comments to be added to the top of the transpiled version of wplib
 // and a dummy export to be imported from other files so that they are recognized as modules.
 export {};
 
 // What to do before/after `npm run build`
 
-// 1. Comment out `export {};` at the bottom of src/wikilib.ts
+// 1. Comment out `export {};` at the bottom of src/wplib.ts
 
 // 2. `npm run build`
 
-// 3. Un-comment out `export {};` at the bottom of src/wikilib.ts
+// 3. Un-comment out `export {};` at the bottom of src/wplib.ts
 
 /**
- *	4. Comment out the following in dist/wikilib.d.ts
+ *	4. Comment out the following in dist/wplib.d.ts
  *	- interface MwString
  *	- declare const mwString
  */
 
-// 5. Add the following to the bottom of dist/wikilib.d.ts
+// 5. Add the following to the bottom of dist/wplib.d.ts
 
-/** The object exported by `wikilib`. */
-// interface WikiLib {
+/** The object exported by `wplib`. */
+// interface WpLib {
 // 	load: typeof load;
 // 	sleep: typeof sleep;
 // 	continuedRequest: typeof continuedRequest;
@@ -30,14 +30,13 @@ export {};
 // 	Template: typeof Template;
 // 	Wikitext: typeof Wikitext;
 // }
-// export {};
 
-// (Add the following to the top of MediaWiki:Gadget-wikilib.js)
+// (Add the following to the top of MediaWiki:Gadget-wplib.js)
 /**
  * This gadget is transpiled from TypeScript. You can find the source code at
- * @link https://github.com/Dr4goniez/wikilib/blob/main/src/wikilib.ts
+ * @link https://github.com/Dr4goniez/wplib/blob/main/src/wplib.ts
  * and an API documentation at
- * @link https://dr4goniez.github.io/wikilib/index.html
+ * @link https://dr4goniez.github.io/wplib/index.html
  * @author [[User:Dragoniez]]
  * @license CC-BY-SA-4.0
  */

@@ -1,8 +1,8 @@
 {
-	"name": "wikilib",
+	"name": "wplib",
 	"out": "./docs",
 	"includeVersion": true,
-	"entryPoints": ["./src/wikilib.ts"],
+	"entryPoints": ["./src/wplib.ts"],
 	"excludeInternal": true,
 	"tsconfig": "tsconfig.json",
 	"exclude": ["node_modules"],

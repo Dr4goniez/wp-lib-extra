@@ -1,0 +1,7 @@
+# .gitignore
+src/test.ts
+
+# Independent exclusions
+docs
+.eslintrc.json
+typedoc.json

@@ -1,6 +1,6 @@
 {
-	"name": "wikilib",
-	"version": "1.0.4",
+	"name": "wplib",
+	"version": "1.0.5",
 	"description": "A function library for Wikipedia.",
 	"scripts": {
 		"build": "tsc -p .",
@@ -8,7 +8,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "wikilib"
+		"url": "wplib"
 	},
 	"keywords": [
 		"wiki"
