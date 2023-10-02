@@ -1,7 +1,8 @@
 {
 	"name": "wp-lib-extra",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"description": "A function library for Wikipedia.",
+	"types": "./dist/wp-lib-extra.d.ts",
 	"scripts": {
 		"build": "tsc -p .",
 		"docs": "typedoc --options typedoc.json"
@@ -21,9 +22,10 @@
 		"@typescript-eslint/parser": "^6.7.3",
 		"eslint": "^8.50.0",
 		"typedoc": "^0.25.1",
+		"types-mediawiki": "^1.4.0",
 		"typescript": "^5.2.2"
 	},
 	"dependencies": {
-		"types-mediawiki": "^1.4.0"
+		"@types/jquery": "^3.5.20"
 	}
 }
