@@ -1606,3 +1606,4 @@ module.exports = {
     Wikitext: Wikitext
 };
 // </nowiki>
+// export {};

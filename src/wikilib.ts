@@ -2181,3 +2181,4 @@ module.exports = {
 	Wikitext
 };
 // </nowiki>
+export {};

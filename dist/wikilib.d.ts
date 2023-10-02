@@ -34,22 +34,22 @@
  * @link https://doc.wikimedia.org/mediawiki-core/master/js/source/mediawiki.String.html#mw-String
  * @internal
  */
-interface MwString {
-    /**
-     * Calculate the byte length of a string (accounting for UTF-8).
-     * @param str
-     * @returns
-     */
-    byteLength: (str: string) => number;
-    /**
-     * Uppercase the first character. Support UTF-16 surrogates for characters outside of BMP.
-     * @param string
-     * @returns
-     */
-    ucFirst: (string: string) => string;
-}
+// interface MwString {
+//     /**
+//      * Calculate the byte length of a string (accounting for UTF-8).
+//      * @param str
+//      * @returns
+//      */
+//     byteLength: (str: string) => number;
+//     /**
+//      * Uppercase the first character. Support UTF-16 surrogates for characters outside of BMP.
+//      * @param string
+//      * @returns
+//      */
+//     ucFirst: (string: string) => string;
+// }
 /** @internal */
-declare const mwString: MwString;
+// declare const mwString: MwString;
 /**
  * Load all the modules that this library depends on.
  * - {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.Title |mediawiki.Title}
@@ -65,6 +65,7 @@ declare function load(): JQueryPromise<boolean>;
  */
 declare function sleep(milliseconds: number): JQueryPromise<void>;
 interface DynamicObject {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
 /**
@@ -949,3 +950,16 @@ interface FragmentOptions {
  * @internal
  */
 declare function processArgFragment(args: ParsedArgument[], fragment: string, options?: FragmentOptions): void;
+
+/** The object exported by `wikilib`. */
+interface WikiLib {
+	load: typeof load;
+	sleep: typeof sleep;
+	continuedRequest: typeof continuedRequest;
+	massRequest: typeof massRequest;
+	clean: typeof clean;
+	arraysEqual: typeof arraysEqual;
+	arraysDiff: typeof arraysDiff;
+	Template: typeof Template;
+	Wikitext: typeof Wikitext;
+}

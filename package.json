@@ -1,6 +1,6 @@
 {
 	"name": "wikilib",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "A function library for Wikipedia.",
 	"scripts": {
 		"build": "tsc -p .",
@@ -16,15 +16,14 @@
 	"author": "Dr4goniez",
 	"license": "CC-BY-SA-4.0",
 	"devDependencies": {
-		"@types/jquery": "^3.5.20",
-		"@types/jqueryui": "^1.12.18",
 		"@types/node": "^20.7.1",
-		"@types/oojs-ui": "^0.47.2",
 		"@typescript-eslint/eslint-plugin": "^6.7.3",
 		"@typescript-eslint/parser": "^6.7.3",
 		"eslint": "^8.50.0",
 		"typedoc": "^0.25.1",
-		"types-mediawiki": "^1.4.0",
 		"typescript": "^5.2.2"
+	},
+	"dependencies": {
+		"types-mediawiki": "^1.4.0"
 	}
 }
