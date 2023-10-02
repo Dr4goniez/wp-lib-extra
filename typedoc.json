@@ -1,8 +1,8 @@
 {
-	"name": "wplib",
+	"name": "wp-lib-extra",
 	"out": "./docs",
 	"includeVersion": true,
-	"entryPoints": ["./src/wplib.ts"],
+	"entryPoints": ["./src/wp-lib-extra.ts"],
 	"excludeInternal": true,
 	"tsconfig": "tsconfig.json",
 	"exclude": ["node_modules"],

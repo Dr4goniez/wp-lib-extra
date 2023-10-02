@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
- * `wplib` is a function library prepared as a gadget on the Japanese Wikipedia.
- * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-wplib.js}
+ * `wp-lib-extra` is a function library prepared as a gadget on the Japanese Wikipedia.
+ * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-WpLibExtra.js}
  *
  * This library is best characterized by its {@link Wikitext} class, which provides various interfaces to parse
  * wikitext, supplementing functionalities lacking in built-in JavaScript libraries of MediaWiki.
@@ -9,22 +9,22 @@
  * How to use this library:
  * ```
  * // In gadgets
- * var wplib = require('./wplib.js');
+ * var lib = require('./WpLibExtra.js');
  * ```
  * ```
- * // In local non-gadget scripts
- * var moduleName = 'ext.gadget.wplib';
+ * // In local non-gadgets
+ * var moduleName = 'ext.gadget.WpLibExtra';
  * mw.loader.using(moduleName).then(function(require) {
- * 	var wplib = require(moduleName);
+ * 	var lib = require(moduleName);
  * });
  * ```
  * ```
  * // In non-local scripts
- * var moduleName = 'ext.gadget.wplib';
+ * var moduleName = 'ext.gadget.WpLibExtra';
  * var moduleUrl = '//ja.wikipedia.org/w/load.php?modules=' + moduleName;
  * mw.loader.getScript(moduleUrl).then(function() {
  * 	mw.loader.using(moduleName).then(function(require) {
- * 		var wplib = require(moduleName);
+ * 		var lib = require(moduleName);
  * 	});
  * });
  * ```
@@ -951,8 +951,8 @@ interface FragmentOptions {
  */
 declare function processArgFragment(args: ParsedArgument[], fragment: string, options?: FragmentOptions): void;
 
-/** The object exported by `wplib`. */
-interface WpLib {
+/** The object exported by `wp-lib-extra`. */
+interface WpLibExtra {
 	load: typeof load;
 	sleep: typeof sleep;
 	continuedRequest: typeof continuedRequest;

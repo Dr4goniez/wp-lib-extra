@@ -1,6 +1,6 @@
 {
-	"name": "wplib",
-	"version": "1.0.5",
+	"name": "wp-lib-extra",
+	"version": "1.0.6",
 	"description": "A function library for Wikipedia.",
 	"scripts": {
 		"build": "tsc -p .",
@@ -8,7 +8,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "wplib"
+		"url": "wp-lib-extra"
 	},
 	"keywords": [
 		"wiki"
