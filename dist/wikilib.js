@@ -2,8 +2,8 @@
 // <nowiki>
 /**
  * @packageDocumentation
- * `wikiLib` is a function library prepared as a gadget on the Japanese Wikipedia.
- * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-wikiLib.js}
+ * `wikilib` is a function library prepared as a gadget on the Japanese Wikipedia.
+ * - {@link https://ja.wikipedia.org/wiki/MediaWiki:Gadget-wikilib.js}
  *
  * This library is best characterized by its {@link Wikitext} class, which provides various interfaces to parse
  * wikitext, supplementing functionalities lacking in built-in JavaScript libraries of MediaWiki.
@@ -11,22 +11,22 @@
  * How to use this library:
  * ```
  * // In gadgets
- * var wikiLib = require('./wikiLib.js');
+ * var wikilib = require('./wikilib.js');
  * ```
  * ```
  * // In local non-gadget scripts
- * var moduleName = 'ext.gadget.wikiLib';
+ * var moduleName = 'ext.gadget.wikilib';
  * mw.loader.using(moduleName).then(function(require) {
- * 	var wikiLib = require(moduleName);
+ * 	var wikilib = require(moduleName);
  * });
  * ```
  * ```
  * // In non-local scripts
- * var moduleName = 'ext.gadget.wikiLib';
+ * var moduleName = 'ext.gadget.wikilib';
  * var moduleUrl = '//ja.wikipedia.org/w/load.php?modules=' + moduleName;
  * mw.loader.getScript(moduleUrl).then(function() {
  * 	mw.loader.using(moduleName).then(function(require) {
- * 		var wikiLib = require(moduleName);
+ * 		var wikilib = require(moduleName);
  * 	});
  * });
  * ```

@@ -1,15 +1,14 @@
 {
-	"name": "wiki-gadgets",
-	"version": "1.0.2",
-	"description": "Gadgets on Japanese Wikipedia.",
-	"main": "index.js",
+	"name": "wikilib",
+	"version": "1.0.3",
+	"description": "A function library for Wikipedia.",
 	"scripts": {
 		"build": "tsc -p .",
 		"docs": "typedoc --options typedoc.json"
 	},
 	"repository": {
 		"type": "git",
-		"url": "wiki-gadgets"
+		"url": "wikilib"
 	},
 	"keywords": [
 		"wiki"
