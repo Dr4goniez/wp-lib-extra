@@ -40,6 +40,9 @@ export {};
  * @link https://github.com/Dr4goniez/wp-lib-extra/blob/main/src/wp-lib-extra.ts
  * and an API documentation at
  * @link https://dr4goniez.github.io/wp-lib-extra/index.html
+ * The type definitions of the library are also available at
+ * @link https://www.npmjs.com/package/wp-lib-extra
+ * 
  * @author [[User:Dragoniez]]
  * @license CC-BY-SA-4.0
  */
