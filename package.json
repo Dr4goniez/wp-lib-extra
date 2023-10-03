@@ -1,8 +1,8 @@
 {
 	"name": "wp-lib-extra",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"description": "A function library for Wikipedia.",
-	"types": "./dist/wp-lib-extra.d.ts",
+	"types": "./types/wp-lib-extra.d.ts",
 	"scripts": {
 		"build": "tsc -p .",
 		"docs": "typedoc --options typedoc.json"

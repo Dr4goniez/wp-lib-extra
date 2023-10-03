@@ -11,12 +11,12 @@ export {};
 // 3. Un-comment out `export {};` at the bottom of src/wp-lib-extra.ts
 
 /**
- *	4. Comment out the following in dist/wp-lib-extra.d.ts
+ *	4. Comment out the following in types/wp-lib-extra.d.ts
  *	- interface MwString
  *	- declare const mwString
  */
 
-// 5. Add the following to the bottom of dist/wp-lib-extra.d.ts
+// 5. Add the following to the bottom of types/wp-lib-extra.d.ts
 
 /** The object exported by `ext.gadget.WpLibExtra`. */
 // declare global {
