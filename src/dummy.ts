@@ -18,8 +18,9 @@ export {};
 
 // 5. Add the following to the bottom of types/wp-lib-extra.d.ts
 
-/** The object exported by `ext.gadget.WpLibExtra`. */
+
 // declare global {
+// 	/** The object exported by `ext.gadget.WpLibExtra`. */
 //     interface WpLibExtra {
 // 		/** The version of the library. */
 // 		version: string;
@@ -28,6 +29,7 @@ export {};
 //         continuedRequest: typeof continuedRequest;
 //         massRequest: typeof massRequest;
 //         clean: typeof clean;
+// 		getIcon: typeof getIcon;
 //         arraysEqual: typeof arraysEqual;
 //         arraysDiff: typeof arraysDiff;
 //         Template: typeof Template;
