@@ -21,6 +21,8 @@ export {};
 /** The object exported by `ext.gadget.WpLibExtra`. */
 // declare global {
 //     interface WpLibExtra {
+// 		/** The version of the library. */
+// 		version: string;
 //         load: typeof load;
 //         sleep: typeof sleep;
 //         continuedRequest: typeof continuedRequest;
