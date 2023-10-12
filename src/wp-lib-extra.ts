@@ -362,6 +362,118 @@ function massRequest(params: DynamicObject, batchParams: string|string[], apilim
 }
 
 /**
+ * (Note: This function always returns an empty array if called on a project other than jawiki.)
+ * 
+ * Get a list of [[WP:VIP]]s.
+ * @param format
+ * By default, returns `NAME` in `WP:VIP#NAME`.
+ * - `title`: `VIP#NAME`
+ * - `prefixedtitle`: `WP:VIP#NAME`
+ * - `wikilink`: `[[WP:VIP#NAME]]`
+ * @returns
+ * @requires mediawiki.api
+ */
+function getVipList(format?: 'title'|'prefixedtitle'|'wikilink'): JQueryPromise<string[]> {
+	if (mw.config.get('wgDBname') !== 'jawiki') {
+		return $.Deferred().resolve([]);
+	}
+	return new mw.Api().get({
+		action: 'parse',
+		page: 'Wikipedia:進行中の荒らし行為',
+		prop: 'sections',
+		formatversion: '2'
+	}).then((res) => {
+
+		const resSect = res && res.parse && res.parse.sections; // undefined or array of objects
+		if (!resSect) return[];
+
+		// Define sections titles that are irrelevant to VIP names
+		const excludeList = [
+			'記述について',
+			'急を要する二段階',
+			'配列',
+			'ブロック等の手段',
+			'このページに利用者名を加える',
+			'注意と選択',
+			'警告の方法',
+			'未登録（匿名・IP）ユーザーの場合',
+			'登録済み（ログイン）ユーザーの場合',
+			'警告中',
+			'関連項目'
+		];
+
+		// Return a list
+		return resSect.reduce((acc: string[], {line, level}: {line: string, level: string}) => {
+			if (!excludeList.includes(line) && level === '3') {
+				switch (format) {
+					case 'title':
+						line = 'VIP#' + line;
+						break;
+					case 'prefixedtitle':
+						line = 'WP:VIP#' + line;
+						break;
+					case 'wikilink':
+						line = '[[WP:VIP#' + line + ']]';
+						break;
+					default:
+				}
+				if (!acc.includes(line)) {
+					acc.push(line);
+				}
+			}
+			return acc;
+		}, []);
+
+	}).catch((_, err) => {
+		console.log(err);
+		return [];
+	});
+}
+
+/**
+ * Collect LTA shortcuts (`LTA:XXX`) in the main namespace and return `XXX` as a list.
+ * @param format
+ * By default, returns `XXX` in `LTA:XXX`.
+ * - `title`: `LTA:XXX`
+ * - `wikilink`: `[[LTA:XXX]]`
+ * @returns
+ * @requires mediawiki.api
+ */
+function getLtaList(format?: 'title'|'wikilink'): JQueryPromise<string[]> {
+	return continuedRequest({
+		action: 'query',
+		list: 'allpages',
+		apprefix: 'LTA:',
+		apnamespace: '0',
+		apfilterredir: 'redirects',
+		aplimit: 'max',
+		formatversion: '2'
+	}, Infinity)
+	.then((response) => {
+		return response.reduce((acc: string[], res) => {
+			const resPgs = res && res.query && res.query.allpages;
+			(resPgs || []).forEach(({title}: {title: string}) => {
+				if (/^LTA:[^/]+$/.test(title)) {
+					switch (format) {
+						case 'title':
+							break;
+						case 'wikilink':
+							title = '[[' + title + ']]';
+							break;
+						default:
+							title = title.replace(/^LTA:/, '');
+					}
+					if (!acc.includes(title)) {
+						acc.push(title);
+					}
+				}
+			});
+			return acc;
+		}, []);
+	});
+}
+
+/**
  * Remove unicode bidirectional characters and leading/trailing `\s`s from a string.
  *
  * @param str Input string.
@@ -2299,6 +2411,8 @@ module.exports = {
 	sleep,
 	continuedRequest,
 	massRequest,
+	getVipList,
+	getLtaList,
 	clean,
 	getIcon,
 	copyToClipboard,

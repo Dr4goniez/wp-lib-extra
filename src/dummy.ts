@@ -36,6 +36,8 @@ export {};
 // 		sleep: typeof sleep;
 // 		continuedRequest: typeof continuedRequest;
 // 		massRequest: typeof massRequest;
+//		getVipList: typeof getVipList;
+//		getLtaList: typeof getLtaList;
 // 		clean: typeof clean;
 // 		getIcon: typeof getIcon;
 // 		copyToClipboard: typeof copyToClipboard;

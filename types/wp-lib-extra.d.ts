@@ -152,6 +152,29 @@ declare global {
      */
     function massRequest(params: DynamicObject, batchParams: string | string[], apilimit?: number): JQueryPromise<(DynamicObject | null)[]>;
     /**
+     * (Note: This function always returns an empty array if called on a project other than jawiki.)
+     *
+     * Get a list of [[WP:VIP]]s.
+     * @param format
+     * By default, returns `NAME` in `WP:VIP#NAME`.
+     * - `title`: `VIP#NAME`
+     * - `prefixedtitle`: `WP:VIP#NAME`
+     * - `wikilink`: `[[WP:VIP#NAME]]`
+     * @returns
+     * @requires mediawiki.api
+     */
+    function getVipList(format?: 'title' | 'prefixedtitle' | 'wikilink'): JQueryPromise<string[]>;
+    /**
+     * Collect LTA shortcuts (`LTA:XXX`) in the main namespace and return `XXX` as a list.
+     * @param format
+     * By default, returns `XXX` in `LTA:XXX`.
+     * - `title`: `LTA:XXX`
+     * - `wikilink`: `[[LTA:XXX]]`
+     * @returns
+     * @requires mediawiki.api
+     */
+    function getLtaList(format?: 'title' | 'wikilink'): JQueryPromise<string[]>;
+    /**
      * Remove unicode bidirectional characters and leading/trailing `\s`s from a string.
      *
      * @param str Input string.
@@ -1038,6 +1061,8 @@ declare global {
 		sleep: typeof sleep;
 		continuedRequest: typeof continuedRequest;
 		massRequest: typeof massRequest;
+		getVipList: typeof getVipList;
+		getLtaList: typeof getLtaList;
 		clean: typeof clean;
 		getIcon: typeof getIcon;
 		copyToClipboard: typeof copyToClipboard;
