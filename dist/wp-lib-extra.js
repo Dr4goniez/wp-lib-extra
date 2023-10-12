@@ -70,7 +70,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 // @ts-ignore
 var mwString = mw.loader.require('mediawiki.String');
 // **************************************************** POLYFILLS ****************************************************
-// Types don't really matter with polyfills
 if (!String.prototype.includes) {
     // https://github.com/alfaslash/string-includes-polyfill/blob/master/string-includes-polyfill.js
     String.prototype.includes = function (search, start) {
@@ -377,6 +376,43 @@ function getIcon(iconType) {
     }
     img.style.cssText = 'vertical-align: middle; height: 1em; border: 0;';
     return img;
+}
+/**
+ * Copy a string to the clipboard.
+ * @param str The string to copy.
+ * @param verbose Whether to show a {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw | mw.notify} message,
+ * defaulted to `false`.
+ *
+ * Available languages: `en`, `ja`.
+ * @returns The copied string (same as the input string).
+ */
+function copyToClipboard(str, verbose) {
+    var temp = document.createElement('textarea');
+    document.body.appendChild(temp); // Create a temporarily hidden text field
+    temp.value = str; // Put the passed string to the text field
+    temp.select(); // Select the text
+    document.execCommand('copy'); // Copy it to the clipboard
+    temp.remove();
+    if (verbose) {
+        var code = "<code style=\"font-family: inherit;\">".concat(str, "</code>");
+        var line = '';
+        switch (verbose) {
+            case 'en':
+                line = "Copied ".concat(code, " to the clipboard.");
+                break;
+            case 'ja':
+                line = "".concat(code, "\u3092\u30AF\u30EA\u30C3\u30D7\u30DC\u30FC\u30C9\u306B\u30B3\u30D4\u30FC\u3057\u307E\u3057\u305F\u3002");
+                break;
+            default:
+                console.error("\"".concat(verbose, "\" is not a valid value for the verbose parameter of copyToClipboard."));
+        }
+        if (line) {
+            var msg = document.createElement('div');
+            msg.innerHTML = line;
+            mw.notify(msg, { type: 'success' });
+        }
+    }
+    return str;
 }
 /**
  * Check whether two arrays are equal. Neither array should contain non-primitive values as its elements.
@@ -1635,6 +1671,7 @@ module.exports = {
     massRequest: massRequest,
     clean: clean,
     getIcon: getIcon,
+    copyToClipboard: copyToClipboard,
     arraysEqual: arraysEqual,
     arraysDiff: arraysDiff,
     Template: Template,

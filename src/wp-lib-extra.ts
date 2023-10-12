@@ -32,10 +32,12 @@
  */
 
 /**
- * @link https://doc.wikimedia.org/mediawiki-core/master/js/source/mediawiki.String.html#mw-String
- * @internal
+ * Type definitions for the methods of {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.String | mw.String}.
+ * 
+ * Note that the relevant object is not part of {@link WpLibExtra} (the interface is available in the npm package).
  */
 interface MwString {
+	// License: https://doc.wikimedia.org/mediawiki-core/master/js/source/mediawiki.String.html#mw-String
 	/**
 	 * Calculate the byte length of a string (accounting for UTF-8).
 	 * @param str
@@ -43,19 +45,61 @@ interface MwString {
 	 */
 	byteLength: (str: string) => number;
 	/**
+	 * Calculate the character length of a string (accounting for UTF-16 surrogates).
+	 * @param str
+	 * @returns
+	 */
+	codePointLength: (str: string) => number;
+	/**
+	 * Like String#charAt, but return the pair of UTF-16 surrogates for characters outside of BMP.
+	 * @param string
+	 * @param offset Offset to extract the character.
+	 * @param backwards Use backwards direction to detect UTF-16 surrogates, defaults to false.
+	 * @returns
+	 */
+	charAt: (string: string, offset: number, backwards?: boolean) => string;
+	/**
+	 * Lowercase the first character. Support UTF-16 surrogates for characters outside of BMP.
+	 * @param string
+	 * @returns
+	 */
+	lcFirst: (string: string) => string;
+	/**
 	 * Uppercase the first character. Support UTF-16 surrogates for characters outside of BMP.
 	 * @param string 
 	 * @returns 
 	 */
 	ucFirst: (string: string) => string;
+	/**
+	 * Utility function to trim down a string, based on `byteLimit` and given a safe start position.
+	 * It supports insertion anywhere in the string, so "foo" to "fobaro" if limit is 4 will result in "fobo",
+	 * not "foba". Basically emulating the native maxlength by reconstructing where the insertion occurred.
+	 * 
+	 * @param safeVal Known value that was previously returned by this function, if none, pass empty string.
+	 * @param newVal New value that may have to be trimmed down.
+	 * @param byteLimit Number of bytes the value may be in size.
+	 * @param filterFunction Function to call on the string before assessing the length.
+	 * @returns
+	 */
+	trimByteLength(safeVal: string, newVal: string, byteLimit: number, filterFunction?: (val: string) => number): {newVal: string; trimmed: boolean;};
+	/**
+	 * Utility function to trim down a string, based on `codePointLimit` and given a safe start position.
+	 * It supports insertion anywhere in the string, so "foo" to "fobaro" if limit is 4 will result in "fobo",
+	 * not "foba". Basically emulating the native maxlength by reconstructing where the insertion occurred.
+	 *
+	 * @param safeVal Known value that was previously returned by this function, if none, pass empty string.
+	 * @param newVal New value that may have to be trimmed down.
+	 * @param codePointLimit Number of characters the value may be in size.
+	 * @param filterFunction Function to call on the string before assessing the length.
+	 * @returns
+	 */
+	trimCodePointLength(safeVal: string, newVal: string, codePointLimit: number, filterFunction?: (val: string) => number): {newVal: string; trimmed: boolean;};
 }
 /** @internal */
 // @ts-ignore
 const mwString: MwString = mw.loader.require('mediawiki.String');
 
 // **************************************************** POLYFILLS ****************************************************
-
-// Types don't really matter with polyfills
 
 if (!String.prototype.includes) {
 	// https://github.com/alfaslash/string-includes-polyfill/blob/master/string-includes-polyfill.js
@@ -364,6 +408,48 @@ function getIcon(iconType: 'load'|'check'|'cross'|'cancel'): HTMLImageElement {
     }
     img.style.cssText = 'vertical-align: middle; height: 1em; border: 0;';
     return img;
+}
+
+/**
+ * Copy a string to the clipboard.
+ * @param str The string to copy.
+ * @param verbose Whether to show a {@link https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw | mw.notify} message,
+ * defaulted to `false`.
+ * 
+ * Available languages: `en`, `ja`.
+ * @returns The copied string (same as the input string).
+ */
+function copyToClipboard(str: string, verbose?: 'en'|'ja'): string {
+
+	const temp = document.createElement('textarea');
+	document.body.appendChild(temp); // Create a temporarily hidden text field
+	temp.value = str; // Put the passed string to the text field
+	temp.select(); // Select the text
+	document.execCommand('copy'); // Copy it to the clipboard
+	temp.remove();
+
+	if (verbose) {
+		const code = `<code style="font-family: inherit;">${str}</code>`;
+		let line = '';
+		switch (verbose) {
+			case 'en':
+				line = `Copied ${code} to the clipboard.`;
+				break;
+			case 'ja':
+				line = `${code}をクリップボードにコピーしました。`;
+				break;
+			default:
+				console.error(`"${verbose}" is not a valid value for the verbose parameter of copyToClipboard.`);
+		}
+		if (line) {
+			const msg = document.createElement('div');
+			msg.innerHTML = line;
+			mw.notify(msg, {type: 'success'});
+		}
+	}
+
+	return str;
+
 }
 
 /**
@@ -2215,6 +2301,7 @@ module.exports = {
 	massRequest,
 	clean,
 	getIcon,
+	copyToClipboard,
 	arraysEqual,
 	arraysDiff,
 	Template,
