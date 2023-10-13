@@ -60,5 +60,5 @@ export {};
  * 
  * @author [[User:Dragoniez]]
  * @license CC-BY-SA-4.0
- * @version 1.1.0
+ * @version 1.2.0
  */

@@ -1773,7 +1773,7 @@ function processArgFragment(args, fragment, options) {
 }
 // **************************************************** EXPORTS ****************************************************
 module.exports = {
-    version: '1.1.0',
+    version: '1.2.0',
     load: load,
     sleep: sleep,
     continuedRequest: continuedRequest,

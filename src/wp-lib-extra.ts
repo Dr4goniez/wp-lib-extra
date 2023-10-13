@@ -43,13 +43,13 @@ interface MwString {
 	 * @param str
 	 * @returns
 	 */
-	byteLength: (str: string) => number;
+	byteLength(str: string): number;
 	/**
 	 * Calculate the character length of a string (accounting for UTF-16 surrogates).
 	 * @param str
 	 * @returns
 	 */
-	codePointLength: (str: string) => number;
+	codePointLength(str: string): number;
 	/**
 	 * Like String#charAt, but return the pair of UTF-16 surrogates for characters outside of BMP.
 	 * @param string
@@ -57,19 +57,19 @@ interface MwString {
 	 * @param backwards Use backwards direction to detect UTF-16 surrogates, defaults to false.
 	 * @returns
 	 */
-	charAt: (string: string, offset: number, backwards?: boolean) => string;
+	charAt(string: string, offset: number, backwards?: boolean): string;
 	/**
 	 * Lowercase the first character. Support UTF-16 surrogates for characters outside of BMP.
 	 * @param string
 	 * @returns
 	 */
-	lcFirst: (string: string) => string;
+	lcFirst(string: string): string;
 	/**
 	 * Uppercase the first character. Support UTF-16 surrogates for characters outside of BMP.
 	 * @param string 
 	 * @returns 
 	 */
-	ucFirst: (string: string) => string;
+	ucFirst(string: string): string;
 	/**
 	 * Utility function to trim down a string, based on `byteLimit` and given a safe start position.
 	 * It supports insertion anywhere in the string, so "foo" to "fobaro" if limit is 4 will result in "fobo",
@@ -2406,7 +2406,7 @@ function processArgFragment(args: ParsedArgument[], fragment: string, options?: 
 // **************************************************** EXPORTS ****************************************************
 
 module.exports = {
-	version: '1.1.0',
+	version: '1.2.0',
 	load,
 	sleep,
 	continuedRequest,
