@@ -2407,7 +2407,7 @@ function processArgFragment(args: ParsedArgument[], fragment: string, options?: 
 // **************************************************** EXPORTS ****************************************************
 
 module.exports = {
-	version: '1.2.1',
+	version: '1.2.2',
 	load,
 	sleep,
 	continuedRequest,

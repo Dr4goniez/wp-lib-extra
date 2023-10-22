@@ -1774,7 +1774,7 @@ function processArgFragment(args, fragment, options) {
 }
 // **************************************************** EXPORTS ****************************************************
 module.exports = {
-    version: '1.2.1',
+    version: '1.2.2',
     load: load,
     sleep: sleep,
     continuedRequest: continuedRequest,

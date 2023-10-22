@@ -18,7 +18,7 @@ export {};
  * - interface FragmentOptions
  * - function processArgFragment
  * 
- * 5. Make interfaces global by adding `declare global {` (excluding `declare function` and `declare class`)
+ * 5. Make interfaces global by adding `declare global {`
  * 
  * 6. Add the following interface to the bottom of the module
  */
@@ -56,5 +56,5 @@ export {};
  * 
  * @author [[User:Dragoniez]]
  * @license CC-BY-SA-4.0
- * @version 1.2.1
+ * @version 1.2.2
  */
