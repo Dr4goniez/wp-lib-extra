@@ -56,5 +56,5 @@ export {};
  * 
  * @author [[User:Dragoniez]]
  * @license CC-BY-SA-4.0
- * @version 1.2.2
+ * @version 1.2.3
  */
